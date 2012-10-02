@@ -33,7 +33,7 @@ public class Hoop {
 			// get file of players
 			BufferedReader in = new BufferedReader(new FileReader(new File(txtPath)));
 			// get tools
-			ClassLoader loader = ToolProvider.getSystemToolClassLoader();
+			ClassLoader loader = ClassLoader.getSystemClassLoader();
 			JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 			StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
 			// load players
@@ -254,7 +254,7 @@ public class Hoop {
 					throw new Exception("Invalid player to pass (please give one of 0,1,2,3,4,5)");
 				passed = true;
 				// try passing
-				double prob = (8.0 + stats[a][2] + stats[a][3]) / 10.0;
+				double prob = (8.0 + stats[a][2] + stats[d][3]) / 10.0;
 				System.err.print("    Player " + holder + " passes to player " + newHolder);
 				// pass missed
 				if (gen.nextDouble() <= prob)

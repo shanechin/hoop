@@ -10,7 +10,7 @@ package hoop.g3;
 
 import java.util.*;
 
-public class Player {
+public class Player implements Comparable<Player> {
   public int team;                  // ID for this Player's team
   public int id;                    // Player ID (Jersey Number)
   
@@ -120,4 +120,16 @@ public class Player {
     stealsAttempted++;
   }
   
+  /* For ordering players */
+  public int compareTo(Player that) {
+    double thisScore = this.shooting() - this.blocking();
+    double thatScore = that.shooting() - that.blocking();
+    
+    if (thisScore < thatScore)
+      return -1;
+    else if (thisScore > thatScore)
+      return 1;
+    else 
+      return 0;
+  }
 }
