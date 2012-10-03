@@ -20,7 +20,10 @@ public class Team implements hoop.sim.Team {
   private Player[] opposingTeam;
   private Player initHolder;
   private Player currentHolder;
-  
+  private Coach currentCoach;
+  private Coach internalCoach;
+  private Coach externalCoach;
+
   public String name() {
     return "Group 3";
   }
@@ -39,6 +42,8 @@ public class Team implements hoop.sim.Team {
     rosters.add(myRoster);
     myTeam = new Player[lineupSize];
     opposingTeam = new Player[lineupSize];
+    internalCoach = new InternalCoach();
+    externalCoach = new ExternalCoach();   
   }
   
   private int initTeam(String teamName) {
@@ -123,30 +128,21 @@ public class Team implements hoop.sim.Team {
       watchGame(history[i]);
     
     opponentID = initTeam(opponent);
-    if (opponentID == id) {
-      int startIndex;
-      if (gamesPlayed == 0)
-        startIndex = 0;
-      else 
-        startIndex = myTeam[lineupSize-1].id % teamSize;
-      
-      for (int i = 0; i < lineupSize; i++)
-        myTeam[i] = myRoster[(startIndex + i) % teamSize];
-    }
-    else {
-      Player[] sorted = Arrays.copyOf(myRoster, teamSize);
-      Arrays.sort(sorted);
-      for (int i = 0; i < lineupSize; i++)
-        myTeam[i] = myRoster[sorted[i].id];
-    }
+    
+    if (opponentID == id)
+    	currentCoach = internalCoach;
+    else 
+    	currentCoach = externalCoach;
     
     gamesPlayed++;  // Maybe I should wait until game ends to increment this?
     
+    myTeam = currentCoach.pickTeam(myRoster, history, teamSize);
     int[] lineup = new int[5];
     for (int i = 0; i < 5; i++)
       lineup[i] = myTeam[i].id;
       
     return lineup;
+ 
   }
   
   /* get players of opponent team */
