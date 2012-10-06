@@ -23,6 +23,8 @@ public class Team implements hoop.sim.Team {
   private Coach externalCoach;
   
   private boolean firstGame = true;
+  private int gamesSeen;
+  private int numTrainingGames;
 
   public String name() {
     return "Group 3";
@@ -61,7 +63,61 @@ public class Team implements hoop.sim.Team {
     return teamIDs.get(teamName);
   }
   
+  private void processRound(Player[] lineupA, Player[] lineupB, Game.Round r) {
+    int[] attackers = r.holders();
+    int[] defenders = r.defenders();
+    
+    for (int j = 0; j < attackers.length-1; j++) {
+      if (r.attacksA) {
+        int index = attackers[j]-1;
+        lineupA[index].passMade();
+        lineupB[defenders[index]-1].stealMissed();
+      }
+      else {
+        int index = attackers[j]-1;
+        lineupB[index].passMade();
+        lineupA[defenders[index]-1].stealMissed();
+      }
+    }
+    
+    int lastAttacker = attackers[attackers.length-1]-1;
+    int lastDefender = defenders[lastAttacker]-1;
+    switch (r.lastAction()) {
+      case SCORED:
+        if (r.attacksA) {
+        lineupA[lastAttacker].shotMade();
+        lineupB[lastDefender].blockMissed();
+      }
+        else {
+          lineupB[lastAttacker].shotMade();
+          lineupA[lastAttacker].blockMissed();
+        }
+        break;
+      case MISSED:
+        if (r.attacksA) {
+        lineupA[lastAttacker].shotMissed();
+        lineupB[lastDefender].blockMade();
+      }
+        else {
+          lineupB[lastAttacker].shotMissed();
+          lineupA[lastAttacker].blockMade();
+        }
+        break;
+      case STOLEN:
+        if (r.attacksA) {
+        lineupA[lastAttacker].passMissed();
+        lineupB[lastDefender].stealMade();
+      }
+        else {
+          lineupB[lastAttacker].passMissed();
+          lineupA[lastAttacker].stealMade();
+        }
+        break;
+    }
+  }
+  
   private void watchGame(Game g) {
+    
     int teamA = initTeam(g.teamA);
     int teamB = initTeam(g.teamB);
     int[] playersA = g.playersA();
@@ -77,59 +133,11 @@ public class Team implements hoop.sim.Team {
       lineupB[i] = rosterB[playersB[i]-1];
     }
     
-    for (int i = 0; i < g.rounds(); i++) {
-      Game.Round r = g.round(i);
-      int[] attackers = r.holders();
-      int[] defenders = r.defenders();
-
-      for (int j = 0; j < attackers.length-1; j++) {
-        if (r.attacksA) {
-          int index = attackers[j]-1;
-          lineupA[index].passMade();
-          lineupB[defenders[index]-1].stealMissed();
-        }
-        else {
-          int index = attackers[j]-1;
-          lineupB[index].passMade();
-          lineupA[defenders[index]-1].stealMissed();
-        }
-      }
-      
-      int lastAttacker = attackers[attackers.length-1]-1;
-      int lastDefender = defenders[lastAttacker]-1;
-      switch (r.lastAction()) {
-        case SCORED:
-          if (r.attacksA) {
-            lineupA[lastAttacker].shotMade();
-            lineupB[lastDefender].blockMissed();
-          }
-          else {
-            lineupB[lastAttacker].shotMade();
-            lineupA[lastAttacker].blockMissed();
-          }
-          break;
-        case MISSED:
-          if (r.attacksA) {
-            lineupA[lastAttacker].shotMissed();
-            lineupB[lastDefender].blockMade();
-          }
-          else {
-            lineupB[lastAttacker].shotMissed();
-            lineupA[lastAttacker].blockMade();
-          }
-          break;
-        case STOLEN:
-          if (r.attacksA) {
-            lineupA[lastAttacker].passMissed();
-            lineupB[lastDefender].stealMade();
-          }
-          else {
-            lineupB[lastAttacker].passMissed();
-            lineupA[lastAttacker].stealMade();
-          }
-          break;
-      }
-    }
+    for (int i = 0; i < g.rounds(); i++)
+      processRound(lineupA, lineupB, g.round(i));
+    
+    //System.out.println(teamA + ": " + g.scoreA + ", " + teamB + ": " + g.scoreB);
+    gamesSeen++;
   }
   
   private void printCounts() {
@@ -148,23 +156,30 @@ public class Team implements hoop.sim.Team {
     if (firstGame) 
       init(totalPlayers);
     
-    for (int i = 0; i < history.length; i++)
-      watchGame(history[i]);
-    
     opponentID = initTeam(opponent);
     
     if (opponentID == id)
      currentCoach = internalCoach;
     else {
-      printCounts();
-     currentCoach = externalCoach;
+      if (gamesSeen == 0) {
+        for (int i = 0; i < history.length; i++)
+          watchGame(history[i]);
+        numTrainingGames = history.length;
+      }
+      else {
+        for (int i = gamesSeen-numTrainingGames; i < history.length-numTrainingGames; i++)
+          watchGame(history[i]);
+      }
+      
+      //printCounts();
+      currentCoach = externalCoach;
     }
     
     myTeam = currentCoach.pickTeam(myRoster, teamSize, lineupSize);
     int[] lineup = new int[5];
     for (int i = 0; i < 5; i++)
       lineup[i] = myTeam[i].id;
-      
+    
     return lineup;
  
   }
