@@ -2,25 +2,22 @@ package hoop.g3;
 
 import hoop.sim.Game;
 
-public abstract class Coach {
+public interface Coach {
  
-	protected int lineupSize = 5; 
-	protected int teamSize;
-	protected Player[] myTeam = new Player[lineupSize];
-	public int gamesPlayed;
-	protected Player initHolder;
-	protected Player currentHolder;
-	
-	/* return 5 players in 1,2,3,4,...,P where P total players */
-	public abstract int[] pickTeam(Player[] myRoster, Game[] history); 
+ /* return 5 players in 1,2,3,4,...,P where P total players */
+ public Player[] pickTeam(Player[] myRoster, int teamSize, int lineupSize); 
 
-	/* return one of 1,2,3,4,5 to pick initial ball holder */
-	public abstract int pickAttack(int yourScore, int opponentScore);
+ /* return one of 1,2,3,4,5 to pick initial ball holder */
+ public int pickAttack(int yourScore, int opponentScore, Game.Round previousRound);
 
-	/* if 0 then shoot, otherwise pass to 1,2,3,4,5 */
-	public abstract int action(int[] defenders, Player[] opposingTeam);
+ /* if 0 then shoot, otherwise pass to 1,2,3,4,5 */
+ public int action(int[] defenders);
 
-	/* pick defenders, use 1,2,3,4,5 for players */
-	public abstract int[] pickDefend(int yourScore, int opponentScore, int ballHolder);
-	
+ /* pick defenders, use 1,2,3,4,5 for players */
+ public int[] pickDefend(int yourScore, int opponentScore, int ballHolder, Game.Round previousRound);
+ 
+ public void setOpposing(Player[] otherTeam);
+ 
+ public void newGame();
+ 
 }
