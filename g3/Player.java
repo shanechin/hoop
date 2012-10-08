@@ -132,4 +132,8 @@ public class Player implements Comparable<Player> {
     else 
       return 0;
   }
+  
+  public String toString(){
+	  return this.id + " " + this.shooting();
+  }
 }

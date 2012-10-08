@@ -1,7 +1,7 @@
 package hoop.g3;
 
 import java.util.Arrays;
-
+import java.util.ArrayList;
 import hoop.sim.Game;
 
 public class ExternalCoach implements Coach {
@@ -29,9 +29,35 @@ public class ExternalCoach implements Coach {
     this.lineupSize = lineupSize;
     Player[] sorted = Arrays.copyOf(myRoster, teamSize);
     Arrays.sort(sorted);
+    
     //This is sorted from worst to best
     for (int i = 0; i < lineupSize; i++)
       myTeam[i] = myRoster[sorted[teamSize -i -1].id-1];
+    
+    int bestShooter  = getSharpShooter(myRoster);
+    int bestDefender = getLockdownDefender(myRoster);
+
+    boolean hasBestShooter = false;
+    boolean hasBestDefender = false;
+    for (int i = 0; i < lineupSize; i++){
+    	if(myTeam[i].id == bestShooter+1)
+        	hasBestShooter = true;
+    	if(myTeam[i].id == bestDefender+1)
+    		hasBestDefender = true;
+    }
+        
+    
+    //fourth worst player is kicked off for the best shooter
+    if(!hasBestShooter){    
+    	myTeam[3] = myRoster[bestShooter];
+    }
+    if(bestDefender != bestShooter && !hasBestDefender 
+    		//don't replace best defender for best shooter
+    		&& myTeam[4].id != bestShooter+1){
+    	myTeam[4] = myRoster[bestDefender];
+    }
+    	    
+    
     
     return myTeam;
   }
@@ -45,20 +71,48 @@ public class ExternalCoach implements Coach {
   
   @Override
   public int pickAttack(int yourScore, int opponentScore, Game.Round previousRound) {
-	if(!hasPassed){
-		hasPassed = true;
-		return getBestPasser(yourScore, opponentScore, previousRound);
-	}
-	else{		
+//	if(!hasPassed){
+	//	hasPassed = true;
+		return getBestPasser();
+	//}
+//	else{		
 		//If we get in here my understanding of the sim is flawed.
-		System.out.println("This is a test.");
-		return 1;
-	}
+	//	System.out.println("This is a test.");
+		//return 1;
+	//}
+  }
+  
+  //[TODO] move these methods to a team class
+  //get our teams best shoter
+  public int getSharpShooter(Player[] myRoster){
+	  double maxPassing = Double.NEGATIVE_INFINITY;
+	    int bestPasser = -1;
+	    for (int i = 0; i < myRoster.length; i++) {
+	      if (myRoster[i].shooting() > maxPassing) {
+	        maxPassing = myRoster[i].shooting();
+	        bestPasser = i;
+	      }
+	    }
+	    return (bestPasser);
+  }
+  
+  //[TODO] move these methods to a team class
+  //get our teams best shoter
+  public int getLockdownDefender(Player[] myRoster){
+	  double maxPassing = Double.POSITIVE_INFINITY;
+	    int bestPasser = -1;
+	    for (int i = 0; i < myRoster.length; i++) {
+	      if (myRoster[i].blocking() < maxPassing) {
+	        maxPassing = myRoster[i].blocking();
+	        bestPasser = i;
+	      }
+	    }
+	    return (bestPasser);
   }
   
   
-  public int getBestPasser(int yourScore, int opponentScore, 
-		  				   Game.Round previousRound){
+  //[TODO] move these methods to a team class
+  public int getBestPasser(){
 	  double maxPassing = Double.NEGATIVE_INFINITY;
 	    int bestPasser = -1;
 	    for (int i = 0; i < 5; i++) {
@@ -72,19 +126,30 @@ public class ExternalCoach implements Coach {
 	    return (bestPasser + 1);
   }
   
-  
-  public int getBestDefender(int yourScore, int opponentScore, 
-			   Game.Round previousRound){
-		double maxDefending = Double.NEGATIVE_INFINITY;
+  //[TODO] move these methods to a team class
+  public int getBestShotBlocker(){
+		double maxDefending = Double.POSITIVE_INFINITY;
 		int bestDefender = -1;
 		for (int i = 0; i < 5; i++) {
-		if (myTeam[i].blocking() > maxDefending) {
+		if (myTeam[i].blocking() < maxDefending) {
 			maxDefending = myTeam[i].blocking();
 			bestDefender = i;
 		}
 		}
-		initHolder = myTeam[bestDefender];
-		currentHolder = initHolder;
+		return (bestDefender + 1);
+}
+  
+  //[TODO] move these methods to a team class & refactor to get best
+  //of a stat
+  public int getBestStealer(){
+		double maxStealing = Double.POSITIVE_INFINITY;
+		int bestDefender = -1;
+		for (int i = 0; i < 5; i++) {
+		if (myTeam[i].stealing() < maxStealing) {
+			maxStealing = myTeam[i].stealing();
+			bestDefender = i;
+		}
+		}
 		return (bestDefender + 1);
 }
   
@@ -114,10 +179,58 @@ public class ExternalCoach implements Coach {
   @Override
   public int[] pickDefend(int yourScore, int opponentScore, int ballHolder, Game.Round previousRound) {
 	hasPassed = false;
-	Player[] defense = new Player[5];
-    for (int i = 0; i < 5; i++) 
-      defense[i] = otherTeam[i];
+	boolean []used = new boolean[5];
 	
-    return new int[] {1, 2, 3, 4, 5};
+	int myBestBlocker = getBestShotBlocker();
+	int myBestStealer = getBestStealer();
+	if (myBestBlocker == myBestStealer){
+		myBestStealer=myBestBlocker +1;
+		if (6== myBestStealer){
+			myBestStealer = 1;
+		}
+	}
+	used[myBestBlocker-1] = true;
+	used[myBestStealer-1] = true;
+	
+	int[] defenderArray = new int [5];
+	int myTeamMember = 0; 
+	int otherTeamsBestShooter = getBestShooter();
+	if (otherTeamsBestShooter == ballHolder){
+		otherTeamsBestShooter=ballHolder +1;
+		if (6== otherTeamsBestShooter){
+			otherTeamsBestShooter = 1;
+		}
+	}
+	for (int i = 0; i < otherTeam.length; i++) {
+
+		if(i == ballHolder-1){
+			myTeamMember = myBestStealer;
+		}
+		else if(i == otherTeamsBestShooter-1){
+			myTeamMember = myBestBlocker;
+		}
+		else{
+			myTeamMember = 1;
+			while(used[myTeamMember-1]){
+				myTeamMember++;
+			}			
+		}
+		defenderArray[i]= myTeamMember;
+		used[myTeamMember-1]=true;				
+	}	
+	return defenderArray;
+    //return new int[] {1, 2, 3, 4, 5};
+  }
+  /* Get's the opposing teams best shooters id */
+  public int getBestShooter(){
+		double maxShooting = Double.NEGATIVE_INFINITY;
+		int bestShooter = -1;
+		for (int i = 0; i < 5; i++) {
+			if (otherTeam[i].shooting() > maxShooting) {
+				maxShooting = otherTeam[i].shooting();
+				bestShooter = i;
+			}
+		}
+		return bestShooter+1;
   }
 }

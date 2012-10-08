@@ -1,6 +1,9 @@
 package hoop.g3;
 
 import hoop.sim.Game;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class InternalCoach implements Coach {
   
@@ -66,8 +69,21 @@ public class InternalCoach implements Coach {
   
   @Override
   public int[] pickDefend(int yourScore, int opponentScore, int ballHolder, Game.Round previousRound) {
-    return new int[] {1, 2, 3, 4, 5};
+	Integer [] myDefenders = new Integer[] {1, 2, 3, 4, 5};
+	List<Integer> myTeam = Arrays.asList(myDefenders);
+	Collections.shuffle(myTeam);
+	//return myTeam.(type[]) collection.toArray(new type[collection.size()])
+	
+    return toIntArray(myTeam);
   }
+  int[] toIntArray(List<Integer> list)  {
+	    int[] ret = new int[list.size()];
+	    int i = 0;
+	    for (Integer e : list)  
+	        ret[i++] = e;
+	    return ret;
+	}
+
   
   public void setOpposing(Player[] other) {
   }

@@ -88,7 +88,7 @@ public class Hoop {
 			System.exit(1);
 		}
 		// games with yourself
-		int selfGames = 10;
+		int selfGames = 1000;
 		if (args.length > 2)
 			selfGames = Integer.parseInt(args[2]);
 		// games with each opponent
@@ -189,6 +189,9 @@ public class Hoop {
 					                   selfResults[match.t2], display);
 					if (result.scoreA == result.scoreB)
 						throw new RuntimeException("Same score!");
+					if(result.teamA.equals("g3")||result.teamB.equals("g3")){
+						//System.out.println("Test");
+					}
 					score[i][j][k][0] = result.scoreA;
 					score[i][j][k][1] = result.scoreB;
 					points[result.scoreA > result.scoreB ? match.t1 : match.t2]++;

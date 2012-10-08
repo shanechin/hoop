@@ -182,6 +182,7 @@ public class Team implements hoop.sim.Team {
     	//[TODO]in new games we will update after every round
         for (int i = gamesSeen-numTrainingGames; i < history.length-numTrainingGames; i++)
           watchGame(history[i]);
+//          System.out.println("for breakpoint");
       }
       
       //printCounts();
@@ -214,7 +215,7 @@ public class Team implements hoop.sim.Team {
   /* return one of 1,2,3,4,5 to pick initial ball holder */
   public int pickAttack(int yourScore, int opponentScore, Game.Round previousRound) {
 	  //before each round process the round before it	  
-	  processRound(myTeam, opposingTeam, previousRound);  
+	  //processRound(myTeam, opposingTeam, previousRound);  
 	  return currentCoach.pickAttack(yourScore, opponentScore, previousRound);
   }
   
@@ -225,7 +226,7 @@ public class Team implements hoop.sim.Team {
   
   /* pick defenders, use 1,2,3,4,5 for players */
   public int[] pickDefend(int yourScore, int opponentScore, int ballHolder, Game.Round previousRound) {
-	  processRound(myTeam, opposingTeam, previousRound);
+	//processRound(myTeam, opposingTeam, previousRound);
 	return currentCoach.pickDefend(yourScore, opponentScore, ballHolder, previousRound);
   }
   
