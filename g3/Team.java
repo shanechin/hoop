@@ -67,31 +67,7 @@ public class Team implements hoop.sim.Team {
     int[] attackers = r.holders();
     int[] defenders = r.defenders();
     
-<<<<<<< HEAD
-    System.out.println("Never watch a game?");
-    for (int i = 0; i < g.rounds(); i++) {
-      Game.Round r = g.round(i);
-      int[] attackers = r.holders();
-      int[] defenders = r.defenders();
 
-      for (int j2 = 0; j2 < defenders.length; j2++) {
-			System.out.println("defenders" + defenders[j2]);
-		}
-      for (int j2 = 0; j2 < attackers.length; j2++) {
-			System.out.println("attackers" + attackers[j2]);
-		}
-      for (int j = 0; j < attackers.length-1; j++) {
-        if (r.attacksA) {
-          //System.out.println(rosterA.length);
-          //System.out.println(rosterB.length);
-          
-         // rosterA[attackers[j]-1].passMade();
-          rosterB[defenders[j]-1].stealMissed();
-        }
-        else {
-          //rosterB[attackers[j]-1].passMade();
-          rosterA[defenders[j]-1].stealMissed();
-=======
     for (int j = 0; j < attackers.length-1; j++) {
       if (r.attacksA) {
         int index = attackers[j]-1;
@@ -116,7 +92,6 @@ public class Team implements hoop.sim.Team {
         else {
           lineupB[lastAttacker].shotMade();
           lineupA[lastAttacker].blockMissed();
->>>>>>> 3de0961e2533303ea3055f56e8fc1c732d0ac9de
         }
         break;
       case MISSED:
@@ -181,35 +156,11 @@ public class Team implements hoop.sim.Team {
   public int[] pickTeam(String opponent, int totalPlayers, Game[] history) {
     if (firstGame) 
       init(totalPlayers);
-    System.out.println("game history" + history.length);
-    System.out.println("games played" + gamesPlayed);
-    
-<<<<<<< HEAD
-    
-    for (int i = gamesSeen; i < history.length; i++){
-    	System.out.println("i" + i);
-        System.out.println("his of i"+history[i]);
-      watchGame(history[i]);
-    }
-    
-    opponentID = initTeam(opponent);
-    if (opponentID == id) {
-    	System.out.println("Do we ever see this?");
-      int startIndex;
-      if (gamesPlayed == 0)
-        startIndex = 0;
-      else 
-        startIndex = myTeam[lineupSize-1].id % teamSize;
-      
-      for (int i = 0; i < lineupSize; i++)
-        myTeam[i] = myRoster[(startIndex + i) % teamSize];
-    }
-=======
     opponentID = initTeam(opponent);
     
     if (opponentID == id)
      currentCoach = internalCoach;
->>>>>>> 3de0961e2533303ea3055f56e8fc1c732d0ac9de
+
     else {
       if (gamesSeen == 0) {
         for (int i = 0; i < history.length; i++)
