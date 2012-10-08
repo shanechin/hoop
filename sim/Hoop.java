@@ -147,6 +147,7 @@ public class Hoop {
 		// compute and print tournament schedule
 		Vector <Iterable <Iterable <Pairs.Pair>>> schedule =
 		    new Vector <Iterable <Iterable <Pairs.Pair>>> ();
+		
 		for (int season = 0 ; season != seasons ; ++season)
 			schedule.add(new Pairs(teams.length));
 		System.err.println("\n### Tournament schedule ###");

@@ -14,17 +14,17 @@ public class Player implements Comparable<Player> {
   public int team;                  // ID for this Player's team
   public int id;                    // Player ID (Jersey Number)
   
-  private int baskets;              // Total shots made by this player
-  private int basketsAttempted;     // Total shots attempted
+  public int baskets;              // Total shots made by this player
+  public int basketsAttempted;     // Total shots attempted
   
-  private int blocks;               // Total shots blocked
-  private int blocksAttempted;      // Total block opportunities
+  public int blocks;               // Total shots blocked
+  public int blocksAttempted;      // Total block opportunities
   
-  private int passes;               // Total passes completed
-  private int passesAttempted;      // Total passes attempted
+  public int passes;               // Total passes completed
+  public int passesAttempted;      // Total passes attempted
   
-  private int steals;               // Total passes stolen
-  private int stealsAttempted;      // Total steal opportunities
+  public int steals;               // Total passes stolen
+  public int stealsAttempted;      // Total steal opportunities
   
   
   /* Public constructor, takes team id and player id */
@@ -68,8 +68,8 @@ public class Player implements Comparable<Player> {
   
   /* Returns estimated stealing score */
   public double stealing() {
-    double stealPct = (double) (9 + steals)/(10 + stealsAttempted);
-    double stealScore = (1.0 - stealPct)/0.2;
+    double stealPct = (double) (1 + steals)/(10 + stealsAttempted);
+    double stealScore = 5.0*stealPct;
     if (stealScore > 1.0)
       return 1.0;
     else 
