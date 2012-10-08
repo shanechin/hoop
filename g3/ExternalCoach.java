@@ -14,9 +14,14 @@ public class ExternalCoach implements Coach {
   private Player initHolder;
   private Player currentHolder;
   
+  private int turn;
+  private boolean hasPassed;
+  
   public ExternalCoach() {
     myTeam = new Player[5];
     otherTeam = new Player[5];
+    turn = 0;
+    hasPassed = false;
   }
   
   @Override
@@ -24,8 +29,9 @@ public class ExternalCoach implements Coach {
     this.lineupSize = lineupSize;
     Player[] sorted = Arrays.copyOf(myRoster, teamSize);
     Arrays.sort(sorted);
+    //This is sorted from worst to best
     for (int i = 0; i < lineupSize; i++)
-      myTeam[i] = myRoster[sorted[i].id-1];
+      myTeam[i] = myRoster[sorted[teamSize -i -1].id-1];
     
     return myTeam;
   }
@@ -39,18 +45,48 @@ public class ExternalCoach implements Coach {
   
   @Override
   public int pickAttack(int yourScore, int opponentScore, Game.Round previousRound) {
-    double maxPassing = Double.NEGATIVE_INFINITY;
-    int bestPasser = -1;
-    for (int i = 0; i < 5; i++) {
-      if (myTeam[i].passing() > maxPassing) {
-        maxPassing = myTeam[i].passing();
-        bestPasser = i;
-      }
-    }
-    initHolder = myTeam[bestPasser];
-    currentHolder = initHolder;
-    return (bestPasser + 1);
+	if(!hasPassed){
+		hasPassed = true;
+		return getBestPasser(yourScore, opponentScore, previousRound);
+	}
+	else{		
+		//If we get in here my understanding of the sim is flawed.
+		System.out.println("This is a test.");
+		return 1;
+	}
   }
+  
+  
+  public int getBestPasser(int yourScore, int opponentScore, 
+		  				   Game.Round previousRound){
+	  double maxPassing = Double.NEGATIVE_INFINITY;
+	    int bestPasser = -1;
+	    for (int i = 0; i < 5; i++) {
+	      if (myTeam[i].passing() > maxPassing) {
+	        maxPassing = myTeam[i].passing();
+	        bestPasser = i;
+	      }
+	    }
+	    initHolder = myTeam[bestPasser];
+	    currentHolder = initHolder;
+	    return (bestPasser + 1);
+  }
+  
+  
+  public int getBestDefender(int yourScore, int opponentScore, 
+			   Game.Round previousRound){
+		double maxDefending = Double.NEGATIVE_INFINITY;
+		int bestDefender = -1;
+		for (int i = 0; i < 5; i++) {
+		if (myTeam[i].blocking() > maxDefending) {
+			maxDefending = myTeam[i].blocking();
+			bestDefender = i;
+		}
+		}
+		initHolder = myTeam[bestDefender];
+		currentHolder = initHolder;
+		return (bestDefender + 1);
+}
   
   @Override
   public int action(int[] defenders) {
@@ -77,6 +113,11 @@ public class ExternalCoach implements Coach {
   
   @Override
   public int[] pickDefend(int yourScore, int opponentScore, int ballHolder, Game.Round previousRound) {
+	hasPassed = false;
+	Player[] defense = new Player[5];
+    for (int i = 0; i < 5; i++) 
+      defense[i] = otherTeam[i];
+	
     return new int[] {1, 2, 3, 4, 5};
   }
 }

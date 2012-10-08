@@ -4,7 +4,7 @@ import hoop.sim.*;
 import java.util.*;
 
 public class Team implements hoop.sim.Team {
-  
+
   private HashMap<String, Integer> teamIDs;
   private Player[] myRoster;
   private ArrayList<Player[]> rosters;
@@ -26,10 +26,15 @@ public class Team implements hoop.sim.Team {
   private int gamesSeen;
   private int numTrainingGames;
 
+ 
   public String name() {
-    return "Group 3";
+    return "g3";
   }
   
+  /**
+   * Initializes initial class variables
+   * @param numPlayers
+   */
   private void init(int numPlayers) {
     teamSize = numPlayers;
     teamIDs = new HashMap<String, Integer>();
@@ -64,9 +69,13 @@ public class Team implements hoop.sim.Team {
   }
   
   private void processRound(Player[] lineupA, Player[] lineupB, Game.Round r) {
+		
+    if(r== null || lineupA[0] == null || lineupB [0] == null){
+		return;
+	}
+	  
     int[] attackers = r.holders();
-    int[] defenders = r.defenders();
-    
+    int[] defenders = r.defenders();    
 
     for (int j = 0; j < attackers.length-1; j++) {
       if (r.attacksA) {
@@ -140,6 +149,8 @@ public class Team implements hoop.sim.Team {
     //System.out.println(teamA + ": " + g.scoreA + ", " + teamB + ": " + g.scoreB);
     gamesSeen++;
   }
+
+
   
   private void printCounts() {
     for (int i = 0; i < myRoster.length; i++) {
@@ -165,9 +176,10 @@ public class Team implements hoop.sim.Team {
       if (gamesSeen == 0) {
         for (int i = 0; i < history.length; i++)
           watchGame(history[i]);
-        numTrainingGames = history.length;
+          numTrainingGames = history.length;
       }
       else {
+    	//[TODO]in new games we will update after every round
         for (int i = gamesSeen-numTrainingGames; i < history.length-numTrainingGames; i++)
           watchGame(history[i]);
       }
@@ -201,7 +213,9 @@ public class Team implements hoop.sim.Team {
   
   /* return one of 1,2,3,4,5 to pick initial ball holder */
   public int pickAttack(int yourScore, int opponentScore, Game.Round previousRound) {
-    return currentCoach.pickAttack(yourScore, opponentScore, previousRound);
+	  //before each round process the round before it	  
+	  processRound(myTeam, opposingTeam, previousRound);  
+	  return currentCoach.pickAttack(yourScore, opponentScore, previousRound);
   }
   
   /* if 0 then shoot, otherwise pass to 1,2,3,4,5 */
@@ -211,7 +225,8 @@ public class Team implements hoop.sim.Team {
   
   /* pick defenders, use 1,2,3,4,5 for players */
   public int[] pickDefend(int yourScore, int opponentScore, int ballHolder, Game.Round previousRound) {
-    return currentCoach.pickDefend(yourScore, opponentScore, ballHolder, previousRound);
+	  processRound(myTeam, opposingTeam, previousRound);
+	return currentCoach.pickDefend(yourScore, opponentScore, ballHolder, previousRound);
   }
   
 }
