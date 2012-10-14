@@ -6,8 +6,13 @@ import javax.tools.*;
 
 public class Hoop {
 
-	private static int gameTurns;
+	// configuration info
+	private static boolean display = false;
+	private static int gameTurns = 100;
+	private static int selfGames = 100;
+	private static int seasons = 10;
 
+	// return game turns
 	public static int gameTurns() { return gameTurns; }
 
 	// list files below a certain directory
@@ -74,25 +79,22 @@ public class Hoop {
 
 	public static void main(String[] args) throws Exception
 	{
-		boolean display = false;
 		// path with players
 		String playerPath = "hoop/players.list";
 		if (args.length > 0)
 			playerPath = args[0];
 		// turns of each game
-		gameTurns = 10;
-		if (args.length > 1)
+		if (args.length > 1) {
 			gameTurns = Integer.parseInt(args[1]);
-		if (gameTurns < 1) {
-			System.err.println("Invalid game turns");
-			System.exit(1);
+			if (gameTurns < 1) {
+				System.err.println("Invalid game turns");
+				System.exit(1);
+			}
 		}
 		// games with yourself
-		int selfGames = 1000;
 		if (args.length > 2)
 			selfGames = Integer.parseInt(args[2]);
 		// games with each opponent
-		int seasons = 2;
 		if (args.length > 3)
 			seasons = Integer.parseInt(args[3]);
 		// initial number of players
@@ -106,6 +108,12 @@ public class Hoop {
 		// check names
 		if (!uniqueNames(teams))
 			throw new Exception("Player names are not unique");
+		// print data
+		System.err.println("\n### Configuration ###");
+		System.err.println("  Training games:     " + align("" + selfGames, 5, true));
+		System.err.println("  Tournament seasons: " + align("" + seasons, 5, true));
+		System.err.println("  Turns per game:     " + align("" + gameTurns, 5, true));
+		System.err.println("  Players per team:   " + align("" + playerPool, 5, true));
 		// generate team stats
 		Random gen = new Random();
 		double[][][] stats = stats(gen, teams.length, playerPool);
@@ -119,10 +127,8 @@ public class Hoop {
 			Vector <Game> oneResults = new Vector <Game> ();
 			for (int game = 0 ; game < selfGames ; ++game) {
 				Game result = play(teams[team], teams[team],
-				                   stats[team], stats[team],
-			                       gameTurns, gen,
-				                   oneResults.toArray(g0),
-				                   g0, g0, display);
+						stats[team], stats[team], gameTurns, gen,
+						oneResults.toArray(g0), g0, g0);
 				selfResults[team][game] = result;
 				oneResults.add(result);
 			}
@@ -146,8 +152,7 @@ public class Hoop {
 				maxName = team.name().length();
 		// compute and print tournament schedule
 		Vector <Iterable <Iterable <Pairs.Pair>>> schedule =
-		    new Vector <Iterable <Iterable <Pairs.Pair>>> ();
-		
+				new Vector <Iterable <Iterable <Pairs.Pair>>> ();
 		for (int season = 0 ; season != seasons ; ++season)
 			schedule.add(new Pairs(teams.length));
 		System.err.println("\n### Tournament schedule ###");
@@ -161,7 +166,7 @@ public class Hoop {
 					String n1 = teams[match.t1].name();
 					String n2 = teams[match.t2].name();
 					System.err.println("     " + align(n1, maxName, false) +
-					                    " - " + align(n2, maxName, false));
+							" - " + align(n2, maxName, false));
 				}
 			}
 		}
@@ -183,15 +188,12 @@ public class Hoop {
 				int k = 0;
 				for (Pairs.Pair match : round) {
 					Game result = play(teams[match.t1], teams[match.t2],
-					                   stats[match.t1], stats[match.t2],
-						               gameTurns, gen, currentHistory,
-					                   selfResults[match.t1],
-					                   selfResults[match.t2], display);
+							stats[match.t1], stats[match.t2],
+							gameTurns, gen, currentHistory,
+							selfResults[match.t1],
+							selfResults[match.t2]);
 					if (result.scoreA == result.scoreB)
 						throw new RuntimeException("Same score!");
-					if(result.teamA.equals("g3")||result.teamB.equals("g3")){
-						//System.out.println("Test");
-					}
 					score[i][j][k][0] = result.scoreA;
 					score[i][j][k][1] = result.scoreB;
 					points[result.scoreA > result.scoreB ? match.t1 : match.t2]++;
@@ -217,8 +219,8 @@ public class Hoop {
 					int s1 = score[seasonNum - 2][roundNum - 2][game][0];
 					int s2 = score[seasonNum - 2][roundNum - 2][game][1];
 					System.err.println("      " + align(n1, maxName, false) +
-					                   " - " + align(n2, maxName, false) +
-					                   ":  " + s1 + "-" + s2);
+							" - " + align(n2, maxName, false) +
+							":  " + s1 + "-" + s2);
 					game++;
 				}
 			}
@@ -233,10 +235,9 @@ public class Hoop {
 
 	// play one game between two teams (could be same)
 	private static Game play(Team teamA, Team teamB,
-	                         double[][] statsA, double[][] statsB,
-	                         int turns, Random gen, Game[] history,
-	                         Game[] historyA, Game[] historyB,
-	                         boolean display) throws Exception {
+			double[][] statsA, double[][] statsB,
+			int turns, Random gen, Game[] history,
+			Game[] historyA, Game[] historyB) throws Exception {
 		int extraTurns = turns / 8;
 		if (extraTurns == 0)
 			extraTurns = 1;
@@ -247,7 +248,8 @@ public class Hoop {
 		int[] playersB = teamB.pickTeam(teamA.name(), statsB.length, append(history, historyB));
 		if (!checkTeam(playersB, statsB.length))
 			throw new Exception("Invalid lineup for team " + teamB.name());
-		if (teamA == teamB && playerTwice(playersA, playersB))
+		boolean selfGame = teamA.name().equals(teamB.name());
+		if (selfGame && playerTwice(playersA, playersB))
 			throw new Exception("Internal game of team " + teamA.name() + " declared player in both lineups");
 		teamA.opponentTeam(playersB);
 		teamB.opponentTeam(playersA);
@@ -262,8 +264,6 @@ public class Hoop {
 		// game state
 		int turn = 1;
 		int holder = 0;
-		boolean changed = true;
-		boolean passed = false;
 		int[] defenders = null;
 		int team = gen.nextInt(2);
 		Team[] p = new Team[] {teamA, teamB};
@@ -272,15 +272,14 @@ public class Hoop {
 		Vector <Integer> holders = new Vector <Integer> ();
 		Game.Action lastAction = Game.Action.SCORED;
 		Game.Round lastRound = null;
-		// info
 		if (display)
-			if (teamA == teamB)
+			if (teamA.name().equals(teamB.name()))
 				System.err.println("Training game: " + teamA.name());
 			else
 				System.err.println("Tournament game: " + teamA.name() + " vs. " + teamB.name());
 		for (;;) {
-			// attack starts now
-			if (holder == 0) {
+			// change of attacking / defensive team
+			if (lastAction != Game.Action.PASSED) {
 				// save old season
 				if (!holders.isEmpty()) {
 					lastRound = new Game.Round(defenders, toIntArray(holders), team == 0, lastAction);
@@ -288,7 +287,6 @@ public class Hoop {
 				}
 				// swap teams
 				team = 1 - team;
-				passed = false;
 				// pick ball holder
 				holder = p[team].pickAttack(score[team], score[1 - team], lastRound);
 				if (holder < 1 || holder > 5)
@@ -297,89 +295,98 @@ public class Hoop {
 				defenders = p[1 - team].pickDefend(score[1 - team], score[team], holder, lastRound);
 				checkTeam(defenders, 5);
 				defenders = Arrays.copyOf(defenders, 5);
+				// check end of game (ties are not allowed)
+				if (turn++ == turns) {
+					if (selfGame || score[0] != score[1]) break;
+					turns += extraTurns;
+				}
 				// display
 				if (display) {
 					if (team == 0)
-						printStartTeamA(holder, defenders, score, changed);
+						printStartTeamA(holder, defenders, score, lastAction == Game.Action.SCORED);
 					else
-						printStartTeamB(holder, defenders, score, changed);
+						printStartTeamB(holder, defenders, score, lastAction == Game.Action.SCORED);
 					System.err.println("  Team " + (team == 0 ? "A" : "B") + " is now attacking  (turn " + turn + ")");
 					System.err.println("    Player " + holder + " holds the ball");
 				}
-				// check end of game (ties are not allowed)
-				if (turn++ == turns) {
-					if (score[0] != score[1]) break;
-					turns += extraTurns;
-				}
-				changed = false;
 				holders.clear();
 			}
 			holders.add(holder);
-			if (display)
-				if (team == 0)
-					printAttackTeamA(holder, defenders);
-				else
-					printAttackTeamB(holder, defenders);
 			// next action
 			int newHolder = p[team].action(defenders);
 			int a = holder - 1 + team * 5;
 			int d = defenders[holder - 1] - 1 + (1 - team) * 5;
 			if (newHolder == 0) {
 				// ensure at least one pass
-				if (!passed)
+				if (lastAction != Game.Action.PASSED)
 					throw new Exception("Cannot shoot without passing at least once");
 				// attempt shoot
 				double prob = (stats[a][0] + stats[d][1]) / 2.0;
-				if (display)
-					System.err.print("    Player " + holder + " shoots");
-				if (gen.nextDouble() > prob) {
-					if (display)
-						System.err.println(" and misses.");
-					lastAction = Game.Action.MISSED;
-				} else {
-					if (display)
-						System.err.println(" and scores! (" + score[0] + "-" + score[1] + ")");
-					score[team]++;
-					changed = true;
-					lastAction = Game.Action.SCORED;
-				}
+				lastAction = gen.nextDouble() > prob ? Game.Action.MISSED : Game.Action.SCORED;
+				if (lastAction == Game.Action.SCORED) score[team]++;
 			} else {
 				// check passing destination
 				if (newHolder < 1 || newHolder > 5)
 					throw new Exception("Invalid player to pass (please give one of 0,1,2,3,4,5)");
-				passed = true;
 				// try passing
 				double prob = (8.0 + stats[a][2] + stats[d][3]) / 10.0;
-				if (display)
-					System.err.print("    Player " + holder + " passes to player " + newHolder);
-				// pass missed
-				if (gen.nextDouble() > prob) {
-					newHolder = 0;
-					lastAction = Game.Action.STOLEN;
-					if (display)
-						System.err.print(" but the ball is stolen!");
-				}
-				if (display)
-					System.err.println("");
+				lastAction = gen.nextDouble() > prob ? Game.Action.STOLEN : Game.Action.PASSED;
+			}
+			if (display) {
+				if (team == 0)
+					printAttackTeamA(holder, defenders);
+				else
+					printAttackTeamB(holder, defenders);
+				if (lastAction == Game.Action.SCORED)
+					System.err.println("    Player " + holder + " scores!  (" + score[team] + "-" + score[1 - team] + ")");
+				else if (lastAction == Game.Action.MISSED)
+					System.err.println("    Player " + holder + " missed the shot.");
+				else if (lastAction == Game.Action.STOLEN)
+					System.err.println("    Player " + holder + " lost the ball.");
+				else
+					System.err.println("    Player " + holder + " passes to " + newHolder);
 			}
 			holder = newHolder;
 		}
 		if (display)
 			System.err.println(teamA.name() + " - " + teamB.name() +
-			                   ":   " + score[0] + "-" + score[1]);
+					":   " + score[0] + "-" + score[1]);
 		return new Game(teamA.name(), teamB.name(), score[0], score[1],
-		                playersA, playersB, seasons.toArray(new Game.Round[0]));
+				playersA, playersB, seasons.toArray(new Game.Round[0]));
 	}
 
 	// generate player stats
 	private static double[][][] stats(Random gen, int teams, int players)
 	{
 		double[][][] stats = new double [teams][players][4];
-		for (int t = 0 ; t != teams ; ++t)
-			for (int i = 0 ; i != players ; ++i)
-				for (int j = 0 ; j != 4 ; ++j)
-					stats[t][i][j] = gen.nextInt(1001) * 0.001;
+		// for each dimension
+		for (int d = 0 ; d != 4 ; ++d) {
+			// choose a random set of values
+			double[] values = new double [players];
+			for (int p = 0 ; p != players ; ++p)
+				values[p] = gen.nextInt(1001) * 0.001;
+			// for each team
+			for (int t = 0 ; t != teams ; ++t) {
+				// permute the values randomly and set player stats
+				shuffle(values, gen);
+				for (int p = 0 ; p != players ; ++p) {
+					stats[t][p][d] = values[p];
+					if(t == 0 && d == 0) System.out.println(values[p] + ": " + p); //0 for team id in players.list and j = 0 for shooting 
+				}
+			}
+		}
 		return stats;
+	}
+
+	// shuffle array
+	private static void shuffle(double[] arr, Random gen)
+	{
+		for (int i = 0 ; i != arr.length ; ++i) {
+			int j = gen.nextInt(arr.length - i) + i;
+			double t = arr[i];
+			arr[i] = arr[j];
+			arr[j] = t;
+		}
 	}
 
 	// check teams

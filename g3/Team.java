@@ -26,6 +26,7 @@ public class Team implements hoop.sim.Team {
   private int gamesSeen;
   private int numTrainingGames;
 
+  private HashMap<String, Integer> counts;
  
   public String name() {
     return "g3";
@@ -49,7 +50,7 @@ public class Team implements hoop.sim.Team {
     rosters.add(myRoster);
     myTeam = new Player[lineupSize];
     opposingTeam = new Player[lineupSize];
-    internalCoach = new InternalCoach();
+    internalCoach = new InternalCoach(teamSize);
     externalCoach = new ExternalCoach();   
     
     firstGame = false;
@@ -155,11 +156,12 @@ public class Team implements hoop.sim.Team {
   private void printCounts() {
     for (int i = 0; i < myRoster.length; i++) {
       Player a = myRoster[i];
-      System.out.println("Player " + i + " Stats:");
-      System.out.println("Shooting: " + myRoster[i].shooting() + " " + a.baskets + " " + a.basketsAttempted);
-      System.out.println("Blocking: " + myRoster[i].blocking() + " " + a.blocks + " " + a.blocksAttempted);
-      System.out.println("Passing: " + myRoster[i].passing() + " " + a.passes + " " + a.passesAttempted);
-      System.out.println("Stealing: " + myRoster[i].stealing() + " " + a.steals + " " + a.stealsAttempted);
+      System.out.println(myRoster[i].shooting());
+ //     System.out.println("Player " + i + " Stats:");
+ //     System.out.println("Shooting: " + myRoster[i].shooting() + " " + a.baskets + " " + a.basketsAttempted);
+ //     System.out.println("Blocking: " + myRoster[i].blocking() + " " + a.blocks + " " + a.blocksAttempted);
+ //     System.out.println("Passing: " + myRoster[i].passing() + " " + a.passes + " " + a.passesAttempted);
+ //     System.out.println("Stealing: " + myRoster[i].stealing() + " " + a.steals + " " + a.stealsAttempted);
     }
   }
   
@@ -182,7 +184,7 @@ public class Team implements hoop.sim.Team {
     	//[TODO]in new games we will update after every round
         for (int i = gamesSeen-numTrainingGames; i < history.length-numTrainingGames; i++)
           watchGame(history[i]);
-//          System.out.println("for breakpoint");
+        // System.out.println("for breakpoint");
       }
       
       //printCounts();

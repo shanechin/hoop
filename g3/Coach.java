@@ -1,5 +1,7 @@
 package hoop.g3;
 
+import java.util.HashMap;
+
 import hoop.sim.Game;
 
 public interface Coach {
@@ -19,5 +21,4 @@ public interface Coach {
 	public void setOpposing(Player[] otherTeam);
  
 	public void newGame();
- 
 }

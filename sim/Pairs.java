@@ -13,7 +13,6 @@ class Pairs implements Iterable <Iterable <Pairs.Pair>> {
 	private boolean[][] done;
 	private Vector <int[]> base;
 
-
 	public static class Pair {
 
 		public final int t1, t2;
