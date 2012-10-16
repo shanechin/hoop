@@ -28,10 +28,8 @@ public class Team implements hoop.sim.Team {
   private boolean firstGame = true;
   private int gamesSeen;
   private int numTrainingGames;
-  private int gamesPlayed;
   
   private boolean realGame = false;
-  private boolean attacking;
   
   private HashMap<String, Integer> counts;
   
@@ -46,7 +44,6 @@ public class Team implements hoop.sim.Team {
    * @param numPlayers
    */
   private void init(int numPlayers) {
-    gamesPlayed = 0;
     teamSize = numPlayers;
     teamIDs = new HashMap<String, Integer>();
     teamIDs.put(name(), id);
@@ -85,43 +82,44 @@ public class Team implements hoop.sim.Team {
     
     return teamIDs.get(teamName);
   }
- 
-  private void checkTeam(int teamId, int games) {
-    System.out.println("\nTeam " + teamId + " Sanity Check");
-    if (teamId == id)
-      System.out.println("------- MY TEAM ----------");
-    System.out.println("Approximate number of my possessions: " + (games*49.5));
-    
-    if (rosters.size() <= teamId)
-      return;
-    
-    Player[] roster = rosters.get(teamId);
-
-    int passOps = 0;
-    int stealOps = 0;
-    int shotOps = 0;
-    int blockOps = 0;
-    for (int i = 0; i < myRoster.length; i++) {
-      passOps += roster[i].passesAttempted;
-      stealOps += roster[i].stealsAttempted;
-      shotOps += roster[i].basketsAttempted;
-      blockOps += roster[i].blocksAttempted;
-    }
-    System.out.println("Passes attempted: " + passOps);
-    System.out.println("Steals attempted: " + stealOps);
-    System.out.println("Shots attempted: " + shotOps);
-    System.out.println("Blocks attempted: " + blockOps);
-    System.out.println();
-  }
   
-  private void sanityCheck() {
-    for (int i = 0; i < MAX_TEAMS; i++) {
-      if (i == id)
-        checkTeam(id, gamesPlayed);
-      else 
-        checkTeam(i, gamesPlayed - numTrainingGames);
+ /* private void processRound(Player[] lineupA, Player[] lineupB, Game.Round r) {
+    
+    int[] attackers = r.holders();
+    int[] defenders = r.defenders();    
+    
+    for (int j = 0; j < attackers.length-1; j++) {
+      int index = attackers[j]-1;
+      Player attacker = r.attacksA ? lineupA[index] : lineupB[index];
+      Player defender = r.attacksA ? lineupB[defenders[index]-1] : lineupA[defenders[index]-1];
+      attacker.passMade();
+      defender.stealMissed();
+      //passHistory[attacker.globalId][defender.globalId].made();
     }
-  }
+    
+    int lastAttacker = attackers[attackers.length-1]-1;
+    int lastDefender = defenders[lastAttacker]-1;
+    Player attacker = r.attacksA ? lineupA[lastAttacker] : lineupB[lastAttacker];
+    Player defender = r.attacksA ? lineupB[lastDefender] : lineupA[lastDefender];
+    
+    switch (r.lastAction()) {
+      case SCORED:
+        attacker.shotMade();
+        defender.blockMissed();
+        shotHistory[attacker.globalId][defender.globalId].made();
+        break;
+      case MISSED:
+        attacker.shotMissed();
+        defender.blockMade();
+        shotHistory[attacker.globalId][defender.globalId].missed();
+        break;
+      case STOLEN:
+        attacker.passMissed();
+        defender.stealMade();
+        //passHistory[attacker.globalId][defender.globalId].missed();
+        break;
+    }
+  }*/
   
   private void processRnd(Player[] attackLineup, Player[] defendLineup, Game.Round r) {
     
@@ -164,8 +162,6 @@ public class Team implements hoop.sim.Team {
   
   private void watchGame(Game g) {
     
-    //System.out.println("GAME HAS " + g.rounds() + " ROUNDS");
-    
     int teamA = initTeam(g.teamA);
     int teamB = initTeam(g.teamB);
     int[] playersA = g.playersA();
@@ -206,33 +202,23 @@ public class Team implements hoop.sim.Team {
     }
   }
   
-  private void watchLastRound(Game g) {
-    if (true)
-      return;
-    int rounds = g.rounds();
-    Game.Round lastRound = g.round(rounds-1);
-    if (attacking) 
-      processRnd(myTeam, opposingTeam, lastRound);
-    else
-      processRnd(opposingTeam, myTeam, lastRound);
-  }
-  
   /* return 5 players in 1,2,3,4,...,P where P total players */
   public int[] pickTeam(String opponent, int totalPlayers, Game[] history) {
     if (firstGame) 
       init(totalPlayers);
     
-    //sanityCheck();
-    gamesPlayed++;
+    //printCounts();
     
     opponentID = initTeam(opponent);
     
     if (opponentID == id) {
       currentCoach = internalCoach;
+      //System.out.println("PRESEASON GAME STARTING...");
     }
     else {
       currentCoach = externalCoach;
       if (gamesSeen == 0) {
+        //System.out.println("TABULATING PRESEASON RESULTS...");
         for (int i = 0; i < history.length; i++)
           watchGame(history[i]);
         numTrainingGames = history.length;
@@ -243,13 +229,15 @@ public class Team implements hoop.sim.Team {
           Game g = history[i];
           // Don't "watch" past regular season games involving us
           // We keep track of these stats as the game happens
-          if (initTeam(g.teamA) == id || initTeam(g.teamB) == id) 
-            watchLastRound(g);
-          else
+          if (initTeam(g.teamA) != id && initTeam(g.teamB) != id) 
             watchGame(g);
         }
       }
-    } 
+      //System.out.println("REGULAR GAME STARTING...");
+    }
+    
+    //printCounts();
+    
     
     myTeam = currentCoach.pickTeam(myRoster, teamSize, lineupSize);
     int[] lineup = new int[5];
@@ -277,9 +265,8 @@ public class Team implements hoop.sim.Team {
   
   /* return one of 1,2,3,4,5 to pick initial ball holder */
   public int pickAttack(int yourScore, int opponentScore, Game.Round previousRound) {
-    attacking = true;
     //before each round process the round before it   
-   if (previousRound != null && realGame)
+    if (previousRound != null && realGame)
       processRnd(opposingTeam, myTeam, previousRound);  
     return currentCoach.pickAttack(yourScore, opponentScore, previousRound);
   }
@@ -291,7 +278,6 @@ public class Team implements hoop.sim.Team {
   
   /* pick defenders, use 1,2,3,4,5 for players */
   public int[] pickDefend(int yourScore, int opponentScore, int ballHolder, Game.Round previousRound) {
-    attacking = false;
     if (previousRound != null && realGame)
       processRnd(myTeam, opposingTeam, previousRound);
     return currentCoach.pickDefend(yourScore, opponentScore, ballHolder, previousRound);
