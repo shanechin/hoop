@@ -141,36 +141,6 @@ public class Player implements Comparable<Player> {
   }
   
   public String toString(){
-    return this.id + " " + this.shooting();
+   return this.id + " " + this.shooting();
   }
 }
-
-/*
-  
- 
-  
-  public class PassingComparator implements Comparator<Player> {
-    public int compare(Player p1, Player p2) {
-      if (p1.passing() > p2.passing())
-        return 1;
-      else if (p1.passing() < p2.passing())
-        return -1;
-      else
-        return 0;
-    }
-  }
-  
-  public class StealingComparator implements Comparator<Player> {
-    public int compare(Player p1, Player p2) {
-      if (p1.stealing() > p2.stealing())
-        return 1;
-      else if (p1.stealing() < p2.stealing())
-        return -1;
-      else
-        return 0;
-    }
-  }
-}
-
-*/
-

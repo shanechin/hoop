@@ -74,24 +74,9 @@ public class ExternalCoach implements Coach {
   
   @Override
   public int pickAttack(int yourScore, int opponentScore, Game.Round previousRound) {
-  
-    /*Player[] shooters = Arrays.copyOf(myTeam);
-    Arrays.sort(shooters, new ShootingComparator());
-    int passer = shooters[shooters.length-1];
-    
-    
-    while (myTeam[lineupIndex].id != blocker.id)
-        lineupIndex++;*/
-    
-    int bestShooter = getOurBestShooter() + 1;
-    int bestPasser = getBestPasser();
-    if (bestPasser != bestShooter)
-      return bestPasser;
-    else 
-      return getBestPasser(bestShooter);
-    
-    //return getBestPasser();
-    
+    // if(!hasPassed){
+    // hasPassed = true;
+    return getBestPasser();
     //}
     // else{  
     //If we get in here my understanding of the sim is flawed.
@@ -103,15 +88,15 @@ public class ExternalCoach implements Coach {
   //[TODO] move these methods to a team class
   //get our teams best shoter
   public int getSharpShooter(Player[] myRoster){
-    double maxShooting = Double.NEGATIVE_INFINITY;
-    int bestShooter = -1;
+    double maxPassing = Double.NEGATIVE_INFINITY;
+    int bestPasser = -1;
     for (int i = 0; i < myRoster.length; i++) {
-      if (myRoster[i].shooting() > maxShooting) {
-        maxShooting = myRoster[i].shooting();
-        bestShooter = i;
+      if (myRoster[i].shooting() > maxPassing) {
+        maxPassing = myRoster[i].shooting();
+        bestPasser = i;
       }
     }
-    return (bestShooter);
+    return (bestPasser);
   }
   
   //[TODO] move these methods to a team class
@@ -135,21 +120,6 @@ public class ExternalCoach implements Coach {
     int bestPasser = -1;
     for (int i = 0; i < 5; i++) {
       if (myTeam[i].passing() > maxPassing) {
-        maxPassing = myTeam[i].passing();
-        bestPasser = i;
-      }
-    }
-    initHolder = myTeam[bestPasser];
-    currentHolder = initHolder;
-    return (bestPasser + 1);
-  }
-  
-  public int getBestPasser(int bestShooter){
-    bestShooter--;
-    double maxPassing = Double.NEGATIVE_INFINITY;
-    int bestPasser = -1;
-    for (int i = 0; i < 5; i++) {
-      if (myTeam[i].passing() > maxPassing  && i != bestShooter) {
         maxPassing = myTeam[i].passing();
         bestPasser = i;
       }
@@ -290,18 +260,6 @@ public class ExternalCoach implements Coach {
       }
     }
     return bestShooter+1;
-  }
-  
-  public int getOurBestShooter(){
-    double maxShooting = Double.NEGATIVE_INFINITY;
-    int bestShooter = -1;
-    for (int i = 0; i < 5; i++) {
-      if (myTeam[i].shooting() > maxShooting) {
-        maxShooting = myTeam[i].shooting();
-        bestShooter = i;
-      }
-    }
-    return bestShooter;
   }
   
 }
