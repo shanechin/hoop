@@ -97,41 +97,18 @@ public class InternalCoach implements Coach {
 
 	private void allPermutations(int teamSize) {
 		int[] perms = new int[teamSize];
-		int count = teamSize - 1;
-		int stepSize = 2; 
-
-		for(int j = 0; j < teamSize; j++)
-			perms[j] = j;
-		allPerms.put(0, perms.clone());
+		int count = teamSize;
+		int stepSize = 1; 
 
 		while(count > 1) {
-			/*	int i = 0;
-			for(int j = 0; j < teamSize; j++) {
-				if(j == 1) {
-					int c = count; 
-					while(c < teamSize) {						
-						perms[i] = c;
-						c++;
-						i++;
-					}
-				}
-				if(j < count) {
-					perms[i] = j;
-					i++;
-				}
-			}  */
-			int start = 0;
-			
+			int start = 0;			
 			for(int j = 0; j < teamSize; j++) {
 				if(j == 0) perms[j] = j;
 				else {
-				//	System.out.println(j * stepSize + start);
 					if (((j * stepSize + start) % teamSize) == start)  start++;
 					perms[j] = (j * stepSize + start) % teamSize;
-
 				}
 			}
-
 
 			allPerms.put((teamSize - count), perms.clone());
 			count--;
