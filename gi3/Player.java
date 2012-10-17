@@ -6,13 +6,15 @@
  * 
  */
 
-package hoop.g3;
+package hoop.gi3;
 
 import java.util.*;
 
 public class Player implements Comparable<Player> {
   public int team;                  // ID for this Player's team
   public int id;                    // Player ID (Jersey Number)
+  
+  public int globalId;
   
   public int baskets;              // Total shots made by this player
   public int basketsAttempted;     // Total shots attempted
@@ -28,9 +30,10 @@ public class Player implements Comparable<Player> {
   
   
   /* Public constructor, takes team id and player id */
-  public Player (int team, int id) {
+  public Player (int team, int id, int teamSize) {
     this.team = team;
     this.id = id;
+    this.globalId = team*teamSize + (id - 1);
     
     baskets = 0;
     basketsAttempted = 0;
@@ -43,6 +46,10 @@ public class Player implements Comparable<Player> {
     
     steals = 0;
     stealsAttempted = 0;
+  }
+  
+  public int globalId() {
+    return globalId;
   }
   
   /* Returns estimated shooting score */
@@ -115,15 +122,15 @@ public class Player implements Comparable<Player> {
     stealsAttempted++;
   }
   
-  /* Updates player counts after a failes steal attempt */
+  /* Updates player counts after a failed steal attempt */
   public void stealMissed() {
     stealsAttempted++;
   }
   
   /* For ordering players */
   public int compareTo(Player that) {
-    double thisScore = this.shooting() - this.blocking();
-    double thatScore = that.shooting() - that.blocking();
+    double thisScore = this.shooting() - this.blocking() + .1*this.passing() - .1*this.stealing();
+    double thatScore = that.shooting() - that.blocking()+ .1*that.passing() - .1*that.stealing();
     
     if (thisScore < thatScore)
       return -1;
@@ -134,6 +141,6 @@ public class Player implements Comparable<Player> {
   }
   
   public String toString(){
-	  return this.id + " " + this.shooting();
+   return this.id + " " + this.shooting();
   }
 }

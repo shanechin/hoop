@@ -1,30 +1,32 @@
+package hoop.gi3;
+
 public class Fraction {
   private int made;
   private int attempted;
   
-  public fraction (initMade, initAttempted) {
+  public Fraction (int initMade, int initAttempted) {
     made = initMade;
     attempted = initAttempted;
   }
   
-  public make() {
+  public void make() {
     made++;
     attempted++;
   }
   
-  public miss() {
+  public void miss() {
     attempted++;
   }
   
-  public made() {
+  public int made() {
     return made;
   }
   
-  public missed() {
+  public int missed() {
     return attempted - made;
   }
   
-  public attempted() {
+  public int attempted() {
     return attempted;
   }
 }
