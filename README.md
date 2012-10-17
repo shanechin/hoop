@@ -13,9 +13,15 @@ Passing Matters
 
 
 G1      42.8     3.8
+
 G2      42.2     4
+
 G3      49.9     2.6 // without passing
+
 G4      17.2     6.3
+
 G5      36.7     4.2
+
 G6      27.5     5.6
-Gi3     56.2     1.7 /// with passing
+
+i3     56.2     1.7 /// with passing
