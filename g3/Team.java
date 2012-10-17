@@ -5,7 +5,7 @@ import java.util.*;
 
 public class Team implements hoop.sim.Team {
   
-  private final int MAX_TEAMS = 6;
+  private final int MAX_TEAMS = 8;
   
   private HashMap<String, Integer> teamIDs;
   private Player[] myRoster;
